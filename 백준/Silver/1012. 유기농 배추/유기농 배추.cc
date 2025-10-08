@@ -1,97 +1,60 @@
-#include <iostream>
-#include<string>
-#include <queue>
-#include <unordered_set>
-#include <map>
-#include <unordered_map>
-#include <stack>
-
+#include<iostream>
 using namespace std;
 
-int NeedWarms(const int N, const int M, const int K);
-int main() {
-	int t;
-	cin >> t;
-	for (int i = 0; i < t; i++) {
-		int N, M, K;
-		cin >> N >> M >> K;
-		cout << NeedWarms(N, M, K) << endl;
-	}
-}
+int testcase, M, N, num, x, y;
+int board[51][51];
+bool visited[51][51];
+int dx[] = { 1, 0, -1, 0 };
+int dy[] = { 0, -1, 0, 1 };
 
-class Cabbage {
-public:
-	unordered_set<Cabbage*>* group;
-};
-
-Cabbage* TryGetCabbage(int x, int y, Cabbage*** cabbages, int n, int m);
-int NeedWarms(const int N, const int M, const int K) {
-	Cabbage*** cabbages = new Cabbage**[N];
-	for (int i = 0; i < N; ++i) {
-		cabbages[i] = new Cabbage*[M];
-		for (int j = 0; j < M; ++j) {
-			cabbages[i][j] = nullptr;
-		}
-	}
-	unordered_set<unordered_set<Cabbage*>*> groups;
-	for (int i = 0; i < K; i++) {
-		int x, y;
-		cin >> x >> y;
-
-		Cabbage* cabbage = new Cabbage{};
-		cabbages[x][y] = cabbage;
-		cabbage->group = new unordered_set<Cabbage*>{ cabbage };
-		groups.insert(cabbage->group);
-		Cabbage* neghbor = TryGetCabbage(x+1, y, cabbages, N, M);
-		if (neghbor != nullptr) {
-			if (cabbage->group != neghbor->group) 
-			{
-
-				cabbage->group->insert(neghbor->group->begin(), neghbor->group->end());
-				for (auto* c : *(neghbor->group)) 
-				{
-					groups.erase(c->group);
-					c->group = cabbage->group;
-				}
-
-			}
-		}
-		neghbor = TryGetCabbage(x-1, y, cabbages, N, M);
-		if (neghbor != nullptr) {
-			if (cabbage->group != neghbor->group) {
-				cabbage->group->insert(neghbor->group->begin(), neghbor->group->end());
-				for (auto* c : *(neghbor->group)) {
-					groups.erase(c->group);
-					c->group = cabbage->group;
-				}
-			}
-		}
-		neghbor = TryGetCabbage(x, y+1, cabbages, N, M);
-		if (neghbor != nullptr) {
-			if (cabbage->group != neghbor->group) {
-				cabbage->group->insert(neghbor->group->begin(), neghbor->group->end());
-				for (auto* c : *(neghbor->group)) {
-					groups.erase(c->group);
-					c->group = cabbage->group;
-				}
-			}
-		}
-		neghbor = TryGetCabbage(x, y-1, cabbages, N, M);
-		if (neghbor != nullptr) {
-			if (cabbage->group != neghbor->group) {
-				cabbage->group->insert(neghbor->group->begin(), neghbor->group->end());
-				for (auto* c : *(neghbor->group)) {
-					groups.erase(c->group);
-					c->group = cabbage->group;
-				}
-			}
-		}
-	}
-	return groups.size();
-}
-Cabbage* TryGetCabbage(int x, int y, Cabbage*** cabbages, int n, int m) 
+void DFS(int x, int y)
 {
-    if (x < 0 || x >= n || y < 0 || y >= m)
-        return nullptr;
-    return cabbages[x][y];
+	if (0 > x || x >= 51)
+	{
+		return;
+	}
+	if (0 > y || y >= 51)
+	{
+
+		return;
+	}
+	if (board[x][y] == 0 || visited[x][y])
+		return;
+
+	visited[x][y] = true;
+
+	for (int i = 0; i < 4; i++) {
+		DFS(x + dx[i], y+ dy[i]);
+	}
+}
+
+int main()
+{
+	cin >> testcase;
+	while (testcase--)
+	{
+		fill_n(board[0], 51 * 51, 0);
+		fill_n(visited[0], 51 * 51, 0);
+
+		int cnt = 0;
+		cin >> M >> N >> num; // M : 가로길이,  N : 세로길이 
+		for (int i = 0; i < num; i++)
+		{
+			cin >> x >> y;
+			board[x][y] = 1; // 채우기
+		}
+
+		for (int i = 0; i < N; i++)
+		{
+			for (int j = 0; j < M; j++)
+			{
+				if (board[j][i] == 1 && visited[j][i] == false)
+				{
+					DFS(j, i);
+					cnt++;
+				}
+			}
+		}
+		cout << cnt << '\n';
+	}
 }
